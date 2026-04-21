@@ -1,0 +1,397 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  width: 100vw;
+  padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  overflow: hidden;
+  background-color: var(--background);
+}
+
+.header {
+  text-align: center;
+  padding: 2rem 1rem;
+  position: relative;
+}
+
+.topActions {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.langToggle {
+  padding: 0.4rem 0.8rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border: 1px solid var(--surface-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.langToggle:hover {
+  color: #fff;
+  border-color: #fff;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.2rem;
+  letter-spacing: -2px;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  max-width: 400px;
+  margin: 0 auto;
+  opacity: 0.8;
+}
+
+.matchup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 1rem;
+}
+
+.cardWrapper {
+  flex: 1;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.cardWrapper:first-child { justify-content: flex-end; }
+.cardWrapper:last-child { justify-content: flex-start; }
+
+.card {
+  height: 100%;
+  max-height: 520px;
+  aspect-ratio: 3 / 4;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 28px;
+  border: 1px solid var(--surface-border);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 猫のカード：左（レッド）、右（ブルー）を復活 */
+.cardLeft:hover {
+  transform: translateY(-8px) scale(1.01);
+  border-color: var(--red);
+  box-shadow: 0 15px 40px var(--red-glow);
+}
+
+.cardRight:hover {
+  transform: translateY(-8px) scale(1.01);
+  border-color: var(--blue);
+  box-shadow: 0 15px 40px var(--blue-glow);
+}
+
+.card.winner {
+  border-color: #ffd700 !important;
+  box-shadow: 0 0 60px rgba(255, 215, 0, 0.4) !important;
+  pointer-events: none;
+}
+
+.card:active {
+  transform: scale(0.96);
+}
+
+.catImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.cardOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.2rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.catName {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.orCircle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--surface-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0;
+  flex-shrink: 0;
+}
+
+/* Leaderboardボタン：テーマカラー（パープル系）に設定 */
+.rankingButton {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1.6rem;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--surface-border);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.rankingButton:hover {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: #000; /* イエローで見やすいように黒文字に */
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--yellow-glow);
+}
+
+.secondaryButtons {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  gap: 0.8rem;
+}
+
+/* 共有ボタンのみ「ホワイト」設定を維持 */
+.iconButton {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--surface-border);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.iconButton:hover {
+  background: #fff;
+  color: #000;
+  transform: rotate(15deg) scale(1.1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+/* スマホ最適化 */
+@media (max-width: 900px) {
+  .container { padding: 0.5rem; }
+  .header { margin-bottom: 1rem; }
+  .title { font-size: 1.8rem; }
+  .subtitle { font-size: 0.75rem; padding: 0 1rem; display: block; }
+  .matchup { flex-direction: column; gap: 0.25rem; }
+  .cardWrapper { justify-content: center !important; height: auto; flex: 1; min-height: 0; }
+  .card { height: 100%; width: auto; max-width: 90%; aspect-ratio: 3 / 4; border-radius: 20px; }
+  .orCircle { margin: -10px 0; z-index: 10; width: 34px; height: 34px; font-size: 0.6rem; }
+  .secondaryButtons { bottom: 1rem; right: 1rem; }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.1; }
+  50% { opacity: 0.2; }
+  100% { opacity: 0.1; }
+}
+
+.pulse {
+  animation: pulse 1s ease-in-out infinite;
+  background: white;
+}
+
+/* Share Toast */
+.shareToast {
+  position: fixed;
+  bottom: 6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.8rem 1.5rem;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  z-index: 200;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modalContent {
+  width: 100%;
+  max-width: 450px;
+  padding: 2.5rem;
+  border-radius: 32px;
+  position: relative;
+  text-align: center;
+}
+
+.closeButton {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.modalTitle {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  letter-spacing: -1px;
+}
+
+.uploadArea {
+  width: 100%;
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.uploadArea:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #fff;
+}
+
+.uploadPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.uploadPlaceholder {
+  color: var(--text-secondary);
+}
+
+.nameInput {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--surface-border);
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.nameInput:focus {
+  border-color: #fff;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 100px;
+  background: #fff;
+  color: #000;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.uploadSuccess {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 0;
+}
+
+.uploadSuccess h2 {
+  font-size: 2rem;
+  font-weight: 800;
+}

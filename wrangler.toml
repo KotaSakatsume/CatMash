@@ -1,0 +1,12 @@
+name = "catmash"
+compatibility_date = "2024-04-01"
+pages_build_output_dir = ".next"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "catmash-db"
+database_id = "local-db-id" # ローカル用なので適当でOK
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "catmash-images"

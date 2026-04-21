@@ -1,0 +1,132 @@
+.rankContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.rankHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.rankTitle {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 100px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.rankList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.rankItem {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+}
+
+.rankNumber {
+  font-size: 1.2rem;
+  font-weight: 800;
+  width: 40px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.rankItem:nth-child(1) .rankNumber { color: #ffd700; }
+.rankItem:nth-child(2) .rankNumber { color: #c0c0c0; }
+.rankItem:nth-child(3) .rankNumber { color: #cd7f32; }
+
+.rankImage {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  object-fit: cover;
+  margin-right: 1rem;
+}
+
+.rankInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.rankName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rankStats {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.rankScore {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--secondary);
+  margin-left: 0.5rem;
+}
+
+.rankScore::after {
+  content: ' pts';
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+@media (max-width: 600px) {
+  .rankContainer {
+    padding: 1rem;
+  }
+
+  .rankTitle {
+    font-size: 1.5rem;
+  }
+
+  .rankNumber {
+    width: 30px;
+    font-size: 1rem;
+  }
+
+  .rankImage {
+    width: 44px;
+    height: 44px;
+    margin-right: 0.75rem;
+  }
+
+  .rankScore {
+    font-size: 1rem;
+  }
+}
