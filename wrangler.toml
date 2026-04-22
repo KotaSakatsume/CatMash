@@ -1,6 +1,6 @@
 name = "catmash"
 compatibility_date = "2024-04-01"
-pages_build_output_dir = ".vercel/output"
+pages_build_output_dir = ".vercel/output/static"
 
 [[d1_databases]]
 binding = "DB"
