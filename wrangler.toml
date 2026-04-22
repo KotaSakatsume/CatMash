@@ -5,7 +5,7 @@ pages_build_output_dir = ".next"
 [[d1_databases]]
 binding = "DB"
 database_name = "catmash-db"
-database_id = "local-db-id" # ローカル用なので適当でOK
+database_id = "6bc4eaa5-6aa7-473f-b337-dcee4d628351"
 
 [[r2_buckets]]
 binding = "BUCKET"
