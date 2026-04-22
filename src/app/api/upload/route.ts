@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
 
     // 重複チェック
     const db = getDb();
-    const existing = await db.prepare('SELECT id FROM cats WHERE hash = ?').bind(hash).first() || 
-                     await db.prepare('SELECT id FROM cats WHERE hash = ?').get(hash);
+    const checkQuery = db.prepare('SELECT id FROM cats WHERE hash = ?');
+    const existing = await (checkQuery.first ? checkQuery.bind(hash).first() : Promise.resolve(checkQuery.get(hash)));
     
     if (existing) {
       return NextResponse.json({ error: 'Already exists' }, { status: 409 });

@@ -35,10 +35,11 @@ export async function getLeaderboard() {
 export async function vote(winnerId: string, loserId: string) {
   const db = getDb();
   
-  const winner = await db.prepare('SELECT * FROM cats WHERE id = ?').bind(winnerId).first() || 
-                 await db.prepare('SELECT * FROM cats WHERE id = ?').get(winnerId);
-  const loser = await db.prepare('SELECT * FROM cats WHERE id = ?').bind(loserId).first() || 
-                await db.prepare('SELECT * FROM cats WHERE id = ?').get(loserId);
+  const winnerQuery = db.prepare('SELECT * FROM cats WHERE id = ?');
+  const winner = await (winnerQuery.first ? winnerQuery.bind(winnerId).first() : Promise.resolve(winnerQuery.get(winnerId)));
+  
+  const loserQuery = db.prepare('SELECT * FROM cats WHERE id = ?');
+  const loser = await (loserQuery.first ? loserQuery.bind(loserId).first() : Promise.resolve(loserQuery.get(loserId)));
 
   if (!winner || !loser) return;
 
@@ -50,11 +51,23 @@ export async function vote(winnerId: string, loserId: string) {
   const newLoserElo = Math.round(loser.elo + K * (0 - expectedLoser));
 
   // 書き込み処理
-  await db.prepare('UPDATE cats SET elo = ?, wins = wins + 1 WHERE id = ?').bind(newWinnerElo, winnerId).run() ||
-  await db.prepare('UPDATE cats SET elo = ?, wins = wins + 1 WHERE id = ?').run(newWinnerElo, winnerId);
+  const updateWinner = db.prepare('UPDATE cats SET elo = ?, wins = wins + 1 WHERE id = ?');
+  if (updateWinner.run) {
+    if (updateWinner.bind && (db as any).batch) { // D1 check
+      await updateWinner.bind(newWinnerElo, winnerId).run();
+    } else { // better-sqlite3
+      updateWinner.run(newWinnerElo, winnerId);
+    }
+  }
   
-  await db.prepare('UPDATE cats SET elo = ?, losses = losses + 1 WHERE id = ?').bind(newLoserElo, loserId).run() ||
-  await db.prepare('UPDATE cats SET elo = ?, losses = losses + 1 WHERE id = ?').run(newLoserElo, loserId);
+  const updateLoser = db.prepare('UPDATE cats SET elo = ?, losses = losses + 1 WHERE id = ?');
+  if (updateLoser.run) {
+    if (updateLoser.bind && (db as any).batch) { // D1 check
+      await updateLoser.bind(newLoserElo, loserId).run();
+    } else { // better-sqlite3
+      updateLoser.run(newLoserElo, loserId);
+    }
+  }
 
   revalidatePath('/');
   revalidatePath('/leaderboard');
@@ -64,7 +77,15 @@ export async function vote(winnerId: string, loserId: string) {
 export async function addCat(name: string, url: string, hash?: string) {
   const db = getDb();
   const id = Math.random().toString(36).substring(7);
-  await db.prepare('INSERT INTO cats (id, name, url, hash) VALUES (?, ?, ?, ?)').bind(id, name, url, hash || null).run() ||
-  await db.prepare('INSERT INTO cats (id, name, url, hash) VALUES (?, ?, ?, ?)').run(id, name, url, hash || null);
+  const insertStmt = db.prepare('INSERT INTO cats (id, name, url, hash) VALUES (?, ?, ?, ?)');
+  
+  if (insertStmt.run) {
+    if (insertStmt.bind && (db as any).batch) { // D1 check
+      await insertStmt.bind(id, name, url, hash || null).run();
+    } else { // better-sqlite3
+      insertStmt.run(id, name, url, hash || null);
+    }
+  }
+  
   revalidatePath('/');
 }
