@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     
-    // Web Crypto API でハッシュ作成 (Edge対応)
+    // Web Crypto API でハッシュ作成
     const hashBuffer = await crypto.subtle.digest('SHA-256', bytes);
     const hash = Array.from(new Uint8Array(hashBuffer))
       .map(b => b.toString(16).padStart(2, '0'))
@@ -26,51 +26,26 @@ export async function POST(request: NextRequest) {
     // 重複チェック
     const db = getDb();
     const checkQuery = db.prepare('SELECT id FROM cats WHERE hash = ?');
-    const existing = await (checkQuery.first ? checkQuery.bind(hash).first() : Promise.resolve(checkQuery.get(hash)));
+    // D1の構文に対応
+    const existing = await checkQuery.bind(hash).first();
     
     if (existing) {
       return NextResponse.json({ error: 'Already exists' }, { status: 409 });
     }
 
     const filename = `${Date.now()}-${hash.substring(0, 8)}.jpg`;
-    let imageUrl = '';
-
-    // --- Cloudflare R2 (本番) か ローカルフォルダ (開発) か ---
-    const bucket = (process.env as any).BUCKET;
     
-    if (bucket) {
-      // 本番環境 (Cloudflare R2)
-      await bucket.put(filename, buffer, {
-        httpMetadata: { contentType: 'image/jpeg' }
-      });
-      // バケットの公開設定に合わせたURL
-      imageUrl = `/uploads/${filename}`;
-    } else if (process.env.NEXT_RUNTIME !== 'edge') {
-      // ローカル開発環境 (Node.js環境でのみ実行)
-      try {
-        const fs = require('fs/promises');
-        const path = require('path');
-        const nodeProcess = typeof process !== 'undefined' ? process : null;
-        const cwd = nodeProcess?.cwd ? (nodeProcess as any).cwd() : '';
-        const uploadDir = path.join(cwd, 'public', 'uploads');
-        
-        try {
-          await fs.access(uploadDir);
-        } catch {
-          await fs.mkdir(uploadDir, { recursive: true });
-        }
-        
-        const filePath = path.join(uploadDir, filename);
-        await fs.writeFile(filePath, buffer);
-        imageUrl = `/uploads/${filename}`;
-      } catch (e) {
-        console.error('Local file write error:', e);
-      }
+    // 本番環境 (Cloudflare R2)
+    const bucket = (process.env as any).BUCKET;
+    if (!bucket) {
+      throw new Error('R2 Binding "BUCKET" is missing.');
     }
 
-    if (!imageUrl) {
-      throw new Error('Image could not be saved');
-    }
+    await bucket.put(filename, buffer, {
+      httpMetadata: { contentType: 'image/jpeg' }
+    });
+    
+    const imageUrl = `/uploads/${filename}`;
 
     // DB登録
     await addCat(name, imageUrl, hash);
