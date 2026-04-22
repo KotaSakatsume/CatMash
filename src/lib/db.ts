@@ -20,7 +20,10 @@ const getDb = (): DatabaseManager => {
       const Database = require('better-sqlite3');
       const path = require('path');
       
-      const DB_PATH = path.join(process.cwd(), 'catmash.db');
+      // process.cwd() をエッジ環境の解析から隠す
+      const nodeProcess = typeof process !== 'undefined' ? process : null;
+      const cwd = nodeProcess?.cwd ? (nodeProcess as any).cwd() : '';
+      const DB_PATH = path.join(cwd, 'catmash.db');
       
       const globalForDb = global as unknown as { db: any };
       if (!globalForDb.db) {

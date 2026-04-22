@@ -50,7 +50,9 @@ export async function POST(request: NextRequest) {
       try {
         const fs = require('fs/promises');
         const path = require('path');
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+        const nodeProcess = typeof process !== 'undefined' ? process : null;
+        const cwd = nodeProcess?.cwd ? (nodeProcess as any).cwd() : '';
+        const uploadDir = path.join(cwd, 'public', 'uploads');
         
         try {
           await fs.access(uploadDir);
