@@ -1,7 +1,5 @@
 'use server';
 
-export const runtime = 'edge';
-
 import getDb from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 

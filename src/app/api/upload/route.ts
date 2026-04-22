@@ -46,9 +46,10 @@ export async function POST(request: NextRequest) {
       // R2の公開URL (デプロイ後に設定するURLを想定)
       imageUrl = `/uploads/${filename}`; // PagesのR2バインドを使う場合のパス
     } else {
-      // ローカル開発環境 (動的インポートでEdgeビルドエラーを回避)
-      const fs = await import('fs/promises');
-      const path = await import('path');
+      // ローカル開発環境 (eval('require') を使ってEdgeコンパイラから隠す)
+      const _require = eval('require');
+      const fs = _require('fs/promises');
+      const path = _require('path');
       const uploadDir = path.join(process.cwd(), 'public', 'uploads');
       try {
         await fs.access(uploadDir);
