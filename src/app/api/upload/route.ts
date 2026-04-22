@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs/promises';
-import crypto from 'crypto';
 import { addCat } from '@/app/actions';
 import getDb from '@/lib/db';
 
-export const runtime = 'nodejs'; // ローカル用のライブラリ（fs系）を使うため
+export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +16,12 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const hash = crypto.createHash('sha256').update(buffer).digest('hex');
+    
+    // Web Crypto API でハッシュ作成 (Edge対応)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', bytes);
+    const hash = Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
 
     // 重複チェック
     const db = getDb();
@@ -44,7 +46,9 @@ export async function POST(request: NextRequest) {
       // R2の公開URL (デプロイ後に設定するURLを想定)
       imageUrl = `/uploads/${filename}`; // PagesのR2バインドを使う場合のパス
     } else {
-      // ローカル開発環境
+      // ローカル開発環境 (動的インポートでEdgeビルドエラーを回避)
+      const fs = await import('fs/promises');
+      const path = await import('path');
       const uploadDir = path.join(process.cwd(), 'public', 'uploads');
       try {
         await fs.access(uploadDir);
