@@ -28,12 +28,12 @@ const i18n = {
   ja: {
     subtitle: "かわいい猫はどっち？",
     leaderboard: "ランキング",
-    uploadBtn: "猫をアップする",
+    uploadBtn: "猫を追加する",
     addCatTitle: "新しい猫を追加",
     catNamePlaceholder: "猫の名前",
     selectPhoto: "写真を選択",
     uploading: "アップロード中...",
-    uploadStart: "アップロードして開始",
+    uploadStart: "猫を追加する",
     successTitle: "完了！",
     successMsg: "エントリーが完了しました。",
     voteHeader: "投票",
@@ -241,8 +241,9 @@ export default function Home() {
       </footer>
 
       <div className="secondaryButtons">
-        <button className="iconButton" onClick={() => setIsUploadOpen(true)} title={t.uploadBtn}>
+        <button className="iconButton glass" onClick={() => setIsUploadOpen(true)}>
           <Upload size={20} />
+          <span>{t.uploadBtn}</span>
         </button>
       </div>
 
