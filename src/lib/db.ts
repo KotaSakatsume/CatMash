@@ -4,23 +4,21 @@ export interface DatabaseManager {
   exec(sql: string): void;
 }
 
-// --- ここで本番 (Cloudflare D1) か ローカル (SQLite) かを判定 ---
-
 const getDb = (): DatabaseManager => {
-  // Cloudflare D1 が存在する場合 (本番環境)
+  // Cloudflare D1 (本番環境) の存在を先にチェック
+  // この環境変数が存在する場合、エッジ環境であるため Node.js のモジュールは読み込まない
   const d1 = (process.env as any).DB;
   if (d1) {
     return d1;
   }
 
-  // ローカル環境用 (Node.js環境でのみ実行されるように動的インポートを使用)
-  // これにより Cloudflare Pages の Edge Runtime ビルドエラーを回避します
-  if (typeof window === 'undefined') {
+  // ローカル開発環境 (Node.js) のためのロジック
+  // runtime が edge の場合はこのブロック全体がコンパイラによって無視されるようにする
+  if (process.env.NEXT_RUNTIME !== 'edge') {
     try {
-      // Node.js固有のモジュールを動的に読み込む (Edgeコンパイラから隠す)
-      const _require = eval('require');
-      const Database = _require('better-sqlite3');
-      const path = _require('path');
+      // require をトップレベルではなく、実行時にのみ解決させる
+      const Database = require('better-sqlite3');
+      const path = require('path');
       
       const DB_PATH = path.join(process.cwd(), 'catmash.db');
       
@@ -53,11 +51,11 @@ const getDb = (): DatabaseManager => {
       }
       return globalForDb.db;
     } catch (e) {
-      console.warn('Local database could not be initialized:', e);
+      // エッジ側で誤ってここに来ても無視するように安全策
     }
   }
 
-  throw new Error('Database is not available in this environment');
+  throw new Error('Database is not initialized or not supported in this environment');
 };
 
 export default getDb;

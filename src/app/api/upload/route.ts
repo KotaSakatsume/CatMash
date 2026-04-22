@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const filename = `${Date.now()}-${hash.substring(0, 8)}.jpg`;
     let imageUrl = '';
 
-    // --- R2 (Cloudflare) か ローカルフォルダ (fs) か ---
+    // --- Cloudflare R2 (本番) か ローカルフォルダ (開発) か ---
     const bucket = (process.env as any).BUCKET;
     
     if (bucket) {
@@ -43,22 +43,31 @@ export async function POST(request: NextRequest) {
       await bucket.put(filename, buffer, {
         httpMetadata: { contentType: 'image/jpeg' }
       });
-      // R2の公開URL (デプロイ後に設定するURLを想定)
-      imageUrl = `/uploads/${filename}`; // PagesのR2バインドを使う場合のパス
-    } else {
-      // ローカル開発環境 (eval('require') を使ってEdgeコンパイラから隠す)
-      const _require = eval('require');
-      const fs = _require('fs/promises');
-      const path = _require('path');
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-      try {
-        await fs.access(uploadDir);
-      } catch {
-        await fs.mkdir(uploadDir, { recursive: true });
-      }
-      const filePath = path.join(uploadDir, filename);
-      await fs.writeFile(filePath, buffer);
+      // バケットの公開設定に合わせたURL
       imageUrl = `/uploads/${filename}`;
+    } else if (process.env.NEXT_RUNTIME !== 'edge') {
+      // ローカル開発環境 (Node.js環境でのみ実行)
+      try {
+        const fs = require('fs/promises');
+        const path = require('path');
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+        
+        try {
+          await fs.access(uploadDir);
+        } catch {
+          await fs.mkdir(uploadDir, { recursive: true });
+        }
+        
+        const filePath = path.join(uploadDir, filename);
+        await fs.writeFile(filePath, buffer);
+        imageUrl = `/uploads/${filename}`;
+      } catch (e) {
+        console.error('Local file write error:', e);
+      }
+    }
+
+    if (!imageUrl) {
+      throw new Error('Image could not be saved');
     }
 
     // DB登録
