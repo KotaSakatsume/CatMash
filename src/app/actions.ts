@@ -32,30 +32,45 @@ export async function getLeaderboard(): Promise<Cat[]> {
 export async function vote(winnerId: string, loserId: string): Promise<void> {
   const db = getDb();
   
-  const winner = await db.prepare('SELECT * FROM cats WHERE id = ?').get<Cat>(winnerId);
-  const loser = await db.prepare('SELECT * FROM cats WHERE id = ?').get<Cat>(loserId);
+  try {
+    // 最新のデータを取得
+    const winner = await db.prepare('SELECT * FROM cats WHERE id = ?').bind(winnerId).first<Cat>();
+    const loser = await db.prepare('SELECT * FROM cats WHERE id = ?').bind(loserId).first<Cat>();
 
-  if (!winner || !loser) return;
+    if (!winner || !loser) {
+      console.error('Cats not found:', { winnerId, loserId });
+      return;
+    }
 
-  const K = 32;
-  const expectedWinner = 1 / (1 + Math.pow(10, (loser.elo - winner.elo) / 400));
-  const expectedLoser = 1 / (1 + Math.pow(10, (winner.elo - loser.elo) / 400));
+    const K = 32;
+    const expectedWinner = 1 / (1 + Math.pow(10, (loser.elo - winner.elo) / 400));
+    const expectedLoser = 1 / (1 + Math.pow(10, (winner.elo - loser.elo) / 400));
 
-  const newWinnerElo = Math.round(winner.elo + K * (1 - expectedWinner));
-  const newLoserElo = Math.round(loser.elo + K * (0 - expectedLoser));
+    const newWinnerElo = Math.round(winner.elo + K * (1 - expectedWinner));
+    const newLoserElo = Math.round(loser.elo + K * (0 - expectedLoser));
 
-  // D1のバッチ処理または順次実行
-  await db.prepare('UPDATE cats SET elo = ?, wins = wins + 1 WHERE id = ?').bind(newWinnerElo.toString(), winnerId).first();
-  await db.prepare('UPDATE cats SET elo = ?, losses = losses + 1 WHERE id = ?').bind(newLoserElo.toString(), loserId).first();
+    // 個別に run() を実行して確実性を高める
+    await db.prepare('UPDATE cats SET elo = ?, wins = wins + 1 WHERE id = ?').bind(newWinnerElo, winnerId).run();
+    await db.prepare('UPDATE cats SET elo = ?, losses = losses + 1 WHERE id = ?').bind(newLoserElo, loserId).run();
 
-  revalidatePath('/');
-  revalidatePath('/leaderboard');
+    // キャッシュを強制クリア
+    revalidatePath('/', 'layout');
+    revalidatePath('/leaderboard');
+  } catch (error) {
+    console.error('Vote action error:', error);
+    throw error;
+  }
 }
 
 // 猫の追加
 export async function addCat(name: string, url: string, hash?: string): Promise<void> {
   const db = getDb();
   const id = Math.random().toString(36).substring(7);
-  await db.prepare('INSERT INTO cats (id, name, url, hash) VALUES (?, ?, ?, ?)').bind(id, name, url, hash || "").first();
-  revalidatePath('/');
+  try {
+    await db.prepare('INSERT INTO cats (id, name, url, hash) VALUES (?, ?, ?, ?)').bind(id, name, url, hash || "").run();
+    revalidatePath('/');
+  } catch (error) {
+    console.error('Add cat error:', error);
+    throw error;
+  }
 }

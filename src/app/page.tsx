@@ -43,6 +43,8 @@ const i18n = {
   }
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const [lang, setLang] = useState<'en' | 'ja'>('ja');
   const t = i18n[lang];
@@ -87,23 +89,40 @@ export default function Home() {
   };
 
   const fetchNewMatchup = async () => {
-    const newPair = await getRandomMatchup();
-    setMatchup(newPair);
-    localStorage.setItem('catmash_current_matchup', JSON.stringify(newPair));
-    setWinnerId(null);
-    setLoaded({});
+    try {
+      const newPair = await getRandomMatchup();
+      setMatchup(newPair);
+      localStorage.setItem('catmash_current_matchup', JSON.stringify(newPair));
+    } catch (err) {
+      console.error("Failed to fetch matchup:", err);
+    } finally {
+      setWinnerId(null);
+      setVoting(false);
+      setLoaded({});
+    }
   };
 
-  const handleVote = async (winnerId: string) => {
+  const handleVote = async (selectedWinnerId: string) => {
     if (voting || !matchup) return;
     setVoting(true);
-    setWinnerId(winnerId);
-    const loserId = matchup[0].id === winnerId ? matchup[1].id : matchup[0].id;
-    await vote(winnerId, loserId);
-    setTimeout(async () => {
-      await fetchNewMatchup();
+    setWinnerId(selectedWinnerId);
+    
+    const loserId = matchup[0].id === selectedWinnerId ? matchup[1].id : matchup[0].id;
+    
+    try {
+      // 投票処理が完了するまで待つ
+      await vote(selectedWinnerId, loserId);
+      
+      // アニメーション完了後に切り替え
+      setTimeout(() => {
+        fetchNewMatchup();
+      }, 700);
+    } catch (err) {
+      console.error("Voting failed:", err);
+      // エラー時もフリーズしないように確実にリセット
       setVoting(false);
-    }, 800);
+      setWinnerId(null);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

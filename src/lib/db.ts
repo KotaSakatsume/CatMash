@@ -9,15 +9,19 @@ export interface Cat {
 
 export interface DatabaseManager {
   prepare(sql: string): {
-    bind(...args: string[]): {
-      first<T>(): Promise<T | null>;
+    bind(...args: any[]): {
+      first<T>(column?: string): Promise<T | null>;
       all<T>(): Promise<{ results: T[] }>;
+      run<T = any>(): Promise<{ success: boolean; meta: any }>;
+      get<T>(...args: any[]): Promise<T | null>;
     };
     all<T>(): Promise<{ results: T[] }>;
-    get<T>(...args: string[]): Promise<T | null>;
-    first<T>(): Promise<T | null>;
+    get<T>(...args: any[]): Promise<T | null>;
+    first<T>(column?: string): Promise<T | null>;
+    run<T = any>(): Promise<{ success: boolean; meta: any }>;
   };
   exec(sql: string): Promise<void>;
+  batch<T = any>(statements: any[]): Promise<any[]>;
 }
 
 const getDb = (): DatabaseManager => {
